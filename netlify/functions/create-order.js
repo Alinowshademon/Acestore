@@ -6,11 +6,11 @@ exports.handler = async function(event, context) {
     const body = JSON.parse(event.body);
     const { orderDetails, total } = body;
 
-    const response = await fetch("https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/issues", {
+    const response = await fetch("https://api.github.com/repos/alinowshademon/acestore/issues", {
       method: "POST",
       headers: {
         "Accept": "application/vnd.github+json",
-        "Authorization": `token ${process.env.GITHUB_TOKEN}`,
+        "Authorization": `token ${process.env.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}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
