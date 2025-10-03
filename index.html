@@ -167,7 +167,7 @@
 
       // Directly show info in order status instead of alert
       document.getElementById('order-status').textContent =
-        `Total amount: ৳${total.toFixed(2)}. Please send to Bkash number: ${bkashNumber}. After payment, submit your TRX ID via the form.`;
+        `Total amount: ৳${total.toFixed(2)}. Please send to Bkash number: ${bkashNumber}. After payment, submit your TRX ID via the form. Wait for 15 minutes and check confirmed orders, Thank you.`;
 
       // Open Google Form in new tab
       let orderDetails = cart.map(item => `${item.name} - ৳${item.price.toFixed(2)}`).join(", ");
