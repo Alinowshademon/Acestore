@@ -67,12 +67,6 @@
   <p>Recent Confirmed Orders(update manually):</p>
   <ul id="confirmed-list">
     <li> Name :- Emon <br> Phone :- 0197XXXX882 <br>Order :- Stylish Jacket -1500 taka <br> Time :- 03:55 (Oct 4, 2025) </li>
-      <li>Oct 3, 2025</li>
-      <li>===========</li>
-      <li>018XXXXX699</li>
-      <li>019XXXXX882</li>
-      <li>018XXXXX176</li>
-      <li>018XXXXX656</li>
   </ul>
   <p class="small-note">After confirming your payment, check this page to see your Order Status.</p>
 </div>
@@ -97,7 +91,11 @@
 </div>
 
 <script>
-const SERVERLESS_URL = "https://Acestoreurl.netlify.app/.netlify/functions/create-order";
+// ⚠️ Replace with your GitHub token (client-side usage is insecure!)
+const GITHUB_TOKEN = "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";
+const REPO_OWNER = "alinowshademon";
+const REPO_NAME = "acestore-orders";
+
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScTSThg_jtbqCnmKreArJEc4fiPVwZqSxEz3ukwLaBj9Xduhg/viewform?usp=pp_url";
 const FORM_ENTRY_ORDER = "entry.472617341";
 const FORM_ENTRY_TOTAL = "entry.1689651769";
@@ -170,32 +168,37 @@ async function confirmAndCreateOrder() {
   const orderDetails = cart.map(it => `${it.name} - ৳${it.price.toFixed(2)}`).join(", ");
 
   const prefillUrl = buildPrefilledFormUrl(orderDetails, total, name, phone);
-  // ✅ open Google Form immediately (so it won't get blocked)
   window.open(prefillUrl, "_blank");
 
-  document.getElementById("order-status").textContent = "Submitting order to GitHub (secure)...";
+  document.getElementById("order-status").textContent = "Submitting order to GitHub...";
   const btn = document.getElementById("confirm-pay-btn");
   btn.disabled = true;
 
-  const payload = {
-    customerName: name || "Guest",
-    customerContact: phone || "",
-    orderDetails,
-    total,
-    timestamp: new Date().toISOString(),
-    prefillFormUrl: prefillUrl
-  };
+  const issueTitle = `New Order: ${name || "Guest"} - ৳${total.toFixed(2)}`;
+  const issueBody = `
+**Customer Name:** ${name || "Guest"}
+**Phone:** ${phone || "N/A"}
+**Order Details:** ${orderDetails}
+**Total:** ৳${total.toFixed(2)}
+**Time:** ${new Date().toLocaleString()}
+**Google Form URL:** ${prefillUrl}
+`;
 
   try {
-    const res = await fetch(SERVERLESS_URL, {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      headers: {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ title: issueTitle, body: issueBody })
     });
+
     if (!res.ok) throw new Error(await res.text());
 
     document.getElementById("order-status").textContent =
-      "✅ Order recorded. Complete payment and submit TRX in the form.";
+      "✅ Order recorded. Complete payment and submit Bkash number in the form.";
     cart = [];
     updateCart();
     closeCheckoutModal();
@@ -219,4 +222,4 @@ showShop();
 updateCart();
 </script>
 </body>
-  </html>
+</html>
