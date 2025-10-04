@@ -84,17 +84,15 @@
     <input id="cust-phone" placeholder="Phone (optional)" />
     <div class="actions">
       <button class="btn" onclick="closeCheckoutModal()">Cancel</button>
-      <button class="btn" id="confirm-pay-btn" onclick="confirmAndCreateOrder()">Confirm & Pay</button>
+      <button class="btn" id="confirm-pay-btn" onclick="confirmAndSendOrder()">Confirm & Pay</button>
     </div>
     <p class="small-note">You will be redirected to a Google Form to submit your TRX ID.</p>
   </div>
 </div>
 
 <script>
-// ⚠️ Replace with your GitHub token (client-side usage is insecure!)
-const GITHUB_TOKEN = "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";
-const REPO_OWNER = "alinowshademon";
-const REPO_NAME = "orders";
+const TELEGRAM_BOT_TOKEN = "8327215930:AAF96m2SbbhrYu5devcHXu_Q16lcp-y8Hqk"; // Replace with your bot token
+const TELEGRAM_CHAT_ID = "7498066483"; // Replace with your chat ID
 
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScTSThg_jtbqCnmKreArJEc4fiPVwZqSxEz3ukwLaBj9Xduhg/viewform?usp=pp_url";
 const FORM_ENTRY_ORDER = "entry.472617341";
@@ -110,7 +108,7 @@ const PRODUCTS = [
 
 let cart = [];
 
-function renderProducts(){
+function renderProducts() {
   const container = document.getElementById("products-list");
   container.innerHTML = "";
   PRODUCTS.forEach(p => {
@@ -127,12 +125,12 @@ function renderProducts(){
 }
 renderProducts();
 
-function addToCart(name, price){
+function addToCart(name, price) {
   cart.push({ name, price });
   updateCart();
 }
 
-function updateCart(){
+function updateCart() {
   document.getElementById("cart-count").textContent = cart.length;
   const tbody = document.getElementById("cart-items");
   tbody.innerHTML = "";
@@ -147,63 +145,62 @@ function updateCart(){
   document.getElementById("cart-total").textContent = "৳" + total.toFixed(2);
 }
 
-function removeItem(i){ cart.splice(i,1); updateCart(); }
+function removeItem(i) { cart.splice(i, 1); updateCart(); }
 
-function showShop(){ hideAllSections(); document.getElementById("shop").style.display="block"; }
-function showCart(){ hideAllSections(); document.getElementById("cart").style.display="block"; }
-function showConfirmedOrders(){ hideAllSections(); document.getElementById("confirmed-orders").style.display="block"; }
-function hideAllSections(){
+function showShop() { hideAllSections(); document.getElementById("shop").style.display="block"; }
+function showCart() { hideAllSections(); document.getElementById("cart").style.display="block"; }
+function showConfirmedOrders() { hideAllSections(); document.getElementById("confirmed-orders").style.display="block"; }
+function hideAllSections() {
   document.getElementById("shop").style.display="none";
   document.getElementById("cart").style.display="none";
   document.getElementById("confirmed-orders").style.display="none";
 }
 
-function openCheckoutModal(){ if(cart.length===0) return; document.getElementById("checkout-modal").style.display = "flex"; }
-function closeCheckoutModal(){ document.getElementById("checkout-modal").style.display = "none"; }
+function openCheckoutModal() { if(cart.length===0) return; document.getElementById("checkout-modal").style.display="flex"; }
+function closeCheckoutModal() { document.getElementById("checkout-modal").style.display="none"; }
 
-async function confirmAndCreateOrder() {
+async function confirmAndSendOrder() {
   const name = document.getElementById("cust-name").value.trim();
   const phone = document.getElementById("cust-phone").value.trim();
   const total = cart.reduce((s, i) => s + i.price, 0);
   const orderDetails = cart.map(it => `${it.name} - ৳${it.price.toFixed(2)}`).join(", ");
 
+  // Open Google Form for Bkash payment
   const prefillUrl = buildPrefilledFormUrl(orderDetails, total, name, phone);
   window.open(prefillUrl, "_blank");
 
-  document.getElementById("order-status").textContent = "Submitting order to GitHub...";
+  document.getElementById("order-status").textContent = "Sending order to Telegram...";
   const btn = document.getElementById("confirm-pay-btn");
   btn.disabled = true;
 
-  const issueTitle = `New Order: ${name || "Guest"} - ৳${total.toFixed(2)}`;
-  const issueBody = `
-**Customer Name:** ${name || "Guest"}
-**Phone:** ${phone || "N/A"}
-**Order Details:** ${orderDetails}
-**Total:** ৳${total.toFixed(2)}
-**Time:** ${new Date().toLocaleString()}
-**Google Form URL:** ${prefillUrl}
+  // Telegram message
+  const message = `
+New Order Received:
+Customer: ${name || "Guest"}
+Phone: ${phone || "N/A"}
+Order: ${orderDetails}
+Total: ৳${total.toFixed(2)}
+Time: ${new Date().toLocaleString()}
+Google Form: ${prefillUrl}
 `;
 
   try {
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
-      headers: {
-        "Authorization": `token ${GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github.v3+json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ title: issueTitle, body: issueBody })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message
+      })
     });
 
-    if (!res.ok) throw new Error(await res.text());
-
     document.getElementById("order-status").textContent =
-      "✅ Order recorded. Complete payment and submit Bkash number in the form.";
+      "✅ Order recorded. Complete payment in Google Form.;
     cart = [];
     updateCart();
     closeCheckoutModal();
-  } catch (e) {
-    document.getElementById("order-status").textContent = "❌ Error: " + e.message;
+  } catch (err) {
+    document.getElementById("order-status").textContent = "❌ Telegram error: " + err.message;
   } finally {
     btn.disabled = false;
   }
