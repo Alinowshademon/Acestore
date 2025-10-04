@@ -81,9 +81,11 @@
   <div class="modal">
     <h3>Confirm Order & Payment</h3>
     <label for="cust-name">Your name</label>
-    <input id="cust-name" placeholder="Full name (optional)" />
+    <input id="cust-name" placeholder="Full name (required)" />
     <label for="cust-phone">Phone</label>
-    <input id="cust-phone" placeholder="Phone (optional)" />
+    <input id="cust-phone" placeholder="Bkash number (required)" /> 
+    <label for="cust-phone">Game UID</label>
+    <input id="cust-phone" placeholder="Your FF UID (required)" />
     <div class="actions">
       <button class="btn" onclick="closeCheckoutModal()">Cancel</button>
       <button class="btn" id="confirm-pay-btn" onclick="confirmAndSendOrder()">Confirm & Pay</button>
