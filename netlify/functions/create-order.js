@@ -1,40 +1,47 @@
 import fetch from "node-fetch";
 
-export async function handler(event) {
-  try {
-    const body = JSON.parse(event.body || "{}");
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
 
-    const GITHUB_TOKEN = process.env.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;
-    const REPO = "alinowshad/acestore"; // example: alinowshad/acestore-orders
+  const body = req.body;
 
-    const title = `🛍️ New Order - ${body.customerName || "Guest"} (${body.total}৳)`;
-    const message = `
-**Order Details:**  
-${body.orderDetails}
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Add this in Vercel Dashboard
+  const REPO = "alinowshad/acestore-orders";        // e.g., alinowshad/acestore-orders
 
+  if (!GITHUB_TOKEN) {
+    return res.status(500).json({ error: "GitHub token not set" });
+  }
+
+  const title = `🛍️ New Order - ${body.customerName || "Guest"} (${body.total}৳)`;
+
+  const issueBody = `
+**Order Details:** ${body.orderDetails}
 **Total:** ৳${body.total}
-**Customer:** ${body.customerName}
-**Contact:** ${body.customerContact}
-**Form:** [Google Form Link](${body.prefillFormUrl})
-**Time:** ${body.timestamp}
+**Customer:** ${body.customerName || "Guest"}
+**Contact:** ${body.customerContact || "N/A"}
+**Form URL:** ${body.prefillFormUrl}
+**Timestamp:** ${body.timestamp}
 `;
 
-    const response = await fetch(`https://api.github.com/repos/${acestore}/issues`, {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${REPO}/issues`, {
       method: "POST",
       headers: {
-        "Authorization": `token ${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}`,
+        "Authorization": `Bearer ${GITHUB_TOKEN}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title, body: message }),
+      body: JSON.stringify({ title, body: issueBody }),
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      return { statusCode: response.status, body: error };
+      const text = await response.text();
+      return res.status(response.status).json({ error: text });
     }
 
-    return { statusCode: 200, body: JSON.stringify({ message: "GitHub issue created!" }) };
+    res.status(200).json({ message: "✅ Order issue created!" });
   } catch (err) {
-    return { statusCode: 500, body: err.message };
+    res.status(500).json({ error: err.message });
   }
 }
