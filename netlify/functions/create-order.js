@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const body = req.body;
 
   const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Add this in Vercel Dashboard
-  const REPO = "alinowshad/acestore-orders";        // e.g., alinowshad/acestore-orders
+  const REPO = "alinowshademon/acestore";        // e.g., alinowshad/acestore-orders
 
   if (!GITHUB_TOKEN) {
     return res.status(500).json({ error: "GitHub token not set" });
