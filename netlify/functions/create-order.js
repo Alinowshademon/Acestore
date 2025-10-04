@@ -1,32 +1,40 @@
-// netlify/functions/create-order.js
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
 
-exports.handler = async function(event, context) {
+export async function handler(event) {
   try {
-    const body = JSON.parse(event.body);
-    const { orderDetails, total } = body;
+    const body = JSON.parse(event.body || "{}");
 
-    const response = await fetch("https://api.github.com/repos/alinowshademon/acestore/issues", {
+    const GITHUB_TOKEN = process.env.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;
+    const REPO = "alinowshad/acestore"; // example: alinowshad/acestore-orders
+
+    const title = `🛍️ New Order - ${body.customerName || "Guest"} (${body.total}৳)`;
+    const message = `
+**Order Details:**  
+${body.orderDetails}
+
+**Total:** ৳${body.total}
+**Customer:** ${body.customerName}
+**Contact:** ${body.customerContact}
+**Form:** [Google Form Link](${body.prefillFormUrl})
+**Time:** ${body.timestamp}
+`;
+
+    const response = await fetch(`https://api.github.com/repos/${acestore}/issues`, {
       method: "POST",
       headers: {
-        "Accept": "application/vnd.github+json",
-        "Authorization": `token ${process.env.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}`,
-        "Content-Type": "application/json"
+        "Authorization": `token ${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}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        title: `New Order - ৳${total}`,
-        body: `Order Details:\n${orderDetails}\n\nTotal: ৳${total}`
-      })
+      body: JSON.stringify({ title, body: message }),
     });
 
     if (!response.ok) {
-      let err = await response.json();
-      return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+      const error = await response.text();
+      return { statusCode: response.status, body: error };
     }
 
-    return { statusCode: 200, body: JSON.stringify({ message: "✅ Order placed!" }) };
-
+    return { statusCode: 200, body: JSON.stringify({ message: "GitHub issue created!" }) };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, body: err.message };
   }
-};
+}
