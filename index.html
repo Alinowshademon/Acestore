@@ -1,183 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>∆CE Store | Online Shopping</title>
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f8f8f8; }
-    header { background: #111; color: white; padding: 20px; text-align: center; }
-    header h1 { margin: 0; font-size: 2em; letter-spacing: 2px; }
-    nav { margin-top: 10px; }
-    nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
-    .container { max-width: 1200px; margin: auto; padding: 20px; }
-    .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-    .product { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center; }
-    .product img { max-width: 100%; border-radius: 8px; }
-    .product h3 { margin: 10px 0; }
-    .price { font-size: 1.2em; color: #333; margin-bottom: 10px; }
-    .btn { background: #111; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-    .btn:hover { background: #444; }
-    footer { background: #111; color: white; text-align: center; padding: 15px; margin-top: 40px; }
-    #cart, #confirmed-orders { display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
-    .remove-btn { background: red; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 5px; }
-    ul { list-style: none; padding-left: 0; }
-    li { padding: 5px 0; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>∆CE Store | Online Shopping</title>
+<style>
+  body { margin:0; font-family:Arial, sans-serif; background:#f8f8f8; }
+  header { background:#111; color:#fff; padding:18px 12px; text-align:center; }
+  header h1 { margin:0; font-size:1.6rem; letter-spacing:2px; }
+  nav { margin-top:8px; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; cursor:pointer; }
+  .container { max-width:1100px; margin:20px auto; padding:12px; }
+  .products { display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+  .product { background:#fff; padding:14px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.08); text-align:center; }
+  .product img{ max-width:100%; border-radius:8px; height:200px; object-fit:cover; }
+  .price{ font-size:1.05rem; color:#333; margin:10px 0; }
+  .btn{ background:#111; color:#fff; padding:10px 14px; border:none; border-radius:6px; cursor:pointer; }
+  .btn:disabled{ opacity:0.6; cursor:not-allowed; }
+  footer{ background:#111; color:#fff; text-align:center; padding:14px; margin-top:28px; }
+
+  #cart, #confirmed-orders { display:none; background:#fff; padding:16px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+  table{ width:100%; border-collapse:collapse; margin-bottom:12px; }
+  th,td{ padding:8px; text-align:center; border-bottom:1px solid #eee; }
+  .remove-btn{ background:#e53935; color:#fff; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
+
+  #checkout-modal { display:none; position:fixed; left:0; right:0; top:0; bottom:0; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; }
+  #checkout-modal .modal { background:#fff; width:360px; max-width:94%; padding:16px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+  .modal label{ display:block; margin:8px 0 6px; font-weight:600; font-size:0.9rem; }
+  .modal input{ width:100%; padding:8px 10px; border-radius:6px; border:1px solid #ddd; }
+  .modal .actions{ display:flex; gap:8px; margin-top:12px; justify-content:flex-end; }
+  .small-note{ font-size:0.85rem; color:#555; margin-top:8px; }
+  @media (max-width:520px){ .product img{ height:160px } }
+</style>
 </head>
 <body>
-  <header>
-    <h1>∆CE Store</h1>
-    <nav>
-      <a href="#home" onclick="showShop()">Shop</a>
-      <a href="#cart" onclick="showCart()">🛒 Cart (<span id="cart-count">0</span>)</a>
-      <a href="#confirmed" onclick="showConfirmedOrders()">Confirmed Orders</a>
-    </nav>
-  </header>
+<header>
+  <h1>∆CE Store</h1>
+  <nav>
+    <a onclick="showShop()">Shop</a>
+    <a onclick="showCart()">🛒 Cart (<span id="cart-count">0</span>)</a>
+    <a onclick="showConfirmedOrders()">Confirmed Orders</a>
+  </nav>
+</header>
 
-  <!-- Shop Section -->
-  <div class="container" id="shop">
-    <h2>Featured Products</h2>
-    <div class="products">
-      <div class="product">
-        <img src="https://m.media-amazon.com/images/I/51oWgroI5PL._UY1000_.jpg" alt="Stylish Jacket">
-        <h3>Stylish Jacket</h3>
-        <p class="price">৳1500</p>
-        <button class="btn" onclick="addToCart('Stylish Jacket', 1500)">Add to Cart</button>
-      </div>
-      <div class="product">
-        <img src="https://i.pinimg.com/736x/51/12/96/511296d23d9358a154a4872e25289917.jpg" alt="Cool Sneakers">
-        <h3>Cool Sneakers</h3>
-        <p class="price">৳1200</p>
-        <button class="btn" onclick="addToCart('Cool Sneakers', 1200)">Add to Cart</button>
-      </div>
-      <div class="product">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWBKhuYEPwT7QuCwlYnU_y1BeShsLx675Zts8p__Gfv06Y9GhB4lswSL4J&s=10" alt="Classic Watch">
-        <h3>Classic Watch</h3>
-        <p class="price">৳600</p>
-        <button class="btn" onclick="addToCart('Classic Watch', 600)">Add to Cart</button>
-      </div>
+<div class="container" id="shop">
+  <h2>Featured Products</h2>
+  <div class="products" id="products-list"></div>
+</div>
+
+<div class="container" id="cart">
+  <h2>Your Cart</h2>
+  <table>
+    <thead><tr><th>Product</th><th>Price</th><th>Action</th></tr></thead>
+    <tbody id="cart-items"></tbody>
+  </table>
+  <h3>Total: <span id="cart-total">৳0.00</span></h3>
+  <div style="display:flex;gap:8px">
+    <button class="btn" onclick="showShop()">Continue Shopping</button>
+    <button class="btn" id="btn-checkout" onclick="openCheckoutModal()">Checkout & Pay</button>
+  </div>
+  <p class="small-note" id="order-status">Order Status: <span>No orders yet</span></p>
+</div>
+
+<div class="container" id="confirmed-orders">
+  <h2>Confirmed Orders</h2>
+  <p>Confirmed TRX IDs / Notes (update manually):</p>
+  <ul id="confirmed-list">
+    <li>— No entries yet —</li>
+  </ul>
+  <p class="small-note">After verifying TRX in bKash, add it here or update via backend.</p>
+</div>
+
+<footer>
+  <p>© 2025 ∆CE Store Online Shopping | All Rights Reserved</p>
+</footer>
+
+<div id="checkout-modal">
+  <div class="modal">
+    <h3>Confirm Order & Payment</h3>
+    <label for="cust-name">Your name</label>
+    <input id="cust-name" placeholder="Full name (optional)" />
+    <label for="cust-phone">Phone / Email</label>
+    <input id="cust-phone" placeholder="Phone or Email (optional)" />
+    <div class="actions">
+      <button class="btn" onclick="closeCheckoutModal()">Cancel</button>
+      <button class="btn" id="confirm-pay-btn" onclick="confirmAndCreateOrder()">Confirm & Pay</button>
     </div>
+    <p class="small-note">You will be redirected to a Google Form to submit your TRX ID.</p>
   </div>
+</div>
 
-  <!-- Cart Section -->
-  <div class="container" id="cart">
-    <h2>Your Cart</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Price</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="cart-items"></tbody>
-    </table>
-    <h3>Total: <span id="cart-total">৳0.00</span></h3>
-    <button class="btn" onclick="checkout()">Checkout</button>
-    <button class="btn" onclick="payWithBkash()">Pay with Bkash</button>
-    <h3>Order Status: <span id="order-status">No orders yet</span></h3>
-  </div>
+<script>
+const SERVERLESS_URL = "https://Acestoreurl.netlify.app/.netlify/functions/create-order";
+const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScTSThg_jtbqCnmKreArJEc4fiPVwZqSxEz3ukwLaBj9Xduhg/viewform?usp=pp_url";
+const FORM_ENTRY_ORDER = "entry.472617341";
+const FORM_ENTRY_TOTAL = "entry.1689651769";
+const FORM_ENTRY_NAME  = "entry.1026182999";
+const FORM_ENTRY_PHONE = "entry.176908676";
 
-  <!-- Confirmed Orders Section -->
-  <div class="container" id="confirmed-orders">
-    <h2>Confirmed Orders</h2>
-    <p>Check your Bkash Number below to see if your order has been confirmed:</p>
-    <ul id="confirmed-list">
-      <li>============</li>
-      <li>Oct 3, 2025</li>
-      <li>===========</li>
-      <li>018XXXXX699</li>
-      <li>019XXXXX882</li>
-      <li>018XXXXX176</li>
-      <li>018XXXXX656</li>
-    </ul>
-    <p>Contact us if your Bkash Number is not listed yet.</p>
-    <a href="tel:+8801973391882">Call +880 1973391882</a>
-  </div>
+const PRODUCTS = [
+  { id: "jacket", name: "Stylish Jacket", price: 1500, img: "https://m.media-amazon.com/images/I/51oWgroI5PL._UY1000_.jpg" },
+  { id: "sneakers", name: "Cool Sneakers", price: 1200, img: "https://i.pinimg.com/736x/51/12/96/511296d23d9358a154a4872e25289917.jpg" },
+  { id: "watch", name: "Classic Watch", price: 600, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWBKhuYEPwT7QuCwlYnU_y1BeShsLx675Zts8p__Gfv06Y9GhB4lswSL4J&s=10" },
+];
 
-  <footer>
-    <p>© 2025 ∆CE Store Online Shopping | All Rights Reserved</p>
-  </footer>
+let cart = [];
 
-  <script>
-    let cart = [];
+function renderProducts(){
+  const container = document.getElementById("products-list");
+  container.innerHTML = "";
+  PRODUCTS.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "product";
+    el.innerHTML = `
+      <img src="${p.img}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <div class="price">৳${p.price}</div>
+      <button class="btn" onclick="addToCart('${p.name}', ${p.price})">Add to Cart</button>
+    `;
+    container.appendChild(el);
+  });
+}
+renderProducts();
 
-    function addToCart(name, price) {
-      cart.push({ name, price });
-      updateCart(); // Directly update cart without pop-ups
-    }
+function addToCart(name, price){
+  cart.push({ name, price });
+  updateCart();
+}
 
-    function updateCart() {
-      document.getElementById('cart-count').textContent = cart.length;
-      let cartItems = document.getElementById('cart-items');
-      cartItems.innerHTML = "";
-      let total = 0;
-      cart.forEach((item, index) => {
-        total += item.price;
-        cartItems.innerHTML += `
-          <tr>
-            <td>${item.name}</td>
-            <td>৳${item.price.toFixed(2)}</td>
-            <td><button class="remove-btn" onclick="removeItem(${index})">Remove</button></td>
-          </tr>
-        `;
-      });
-      document.getElementById('cart-total').textContent = "৳" + total.toFixed(2);
-    }
+function updateCart(){
+  document.getElementById("cart-count").textContent = cart.length;
+  const tbody = document.getElementById("cart-items");
+  tbody.innerHTML = "";
+  let total = 0;
+  cart.forEach((item, i) => {
+    total += item.price;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${item.name}</td><td>৳${item.price.toFixed(2)}</td>
+      <td><button class="remove-btn" onclick="removeItem(${i})">Remove</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById("cart-total").textContent = "৳" + total.toFixed(2);
+}
 
-    function removeItem(index) {
-      cart.splice(index, 1);
-      updateCart();
-    }
+function removeItem(i){ cart.splice(i,1); updateCart(); }
 
-    function showCart() {
-      hideAllSections();
-      document.getElementById('cart').style.display = "block";
-    }
+function showShop(){ hideAllSections(); document.getElementById("shop").style.display="block"; }
+function showCart(){ hideAllSections(); document.getElementById("cart").style.display="block"; }
+function showConfirmedOrders(){ hideAllSections(); document.getElementById("confirmed-orders").style.display="block"; }
+function hideAllSections(){
+  document.getElementById("shop").style.display="none";
+  document.getElementById("cart").style.display="none";
+  document.getElementById("confirmed-orders").style.display="none";
+}
 
-    function showShop() {
-      hideAllSections();
-      document.getElementById('shop').style.display = "block";
-    }
+function openCheckoutModal(){ if(cart.length===0) return; document.getElementById("checkout-modal").style.display = "flex"; }
+function closeCheckoutModal(){ document.getElementById("checkout-modal").style.display = "none"; }
 
-    function showConfirmedOrders() {
-      hideAllSections();
-      document.getElementById('confirmed-orders').style.display = "block";
-    }
+async function confirmAndCreateOrder() {
+  const name = document.getElementById("cust-name").value.trim();
+  const phone = document.getElementById("cust-phone").value.trim();
+  const total = cart.reduce((s, i) => s + i.price, 0);
+  const orderDetails = cart.map(it => `${it.name} - ৳${it.price.toFixed(2)}`).join(", ");
 
-    function hideAllSections() {
-      document.getElementById('shop').style.display = "none";
-      document.getElementById('cart').style.display = "none";
-      document.getElementById('confirmed-orders').style.display = "none";
-    }
+  const prefillUrl = buildPrefilledFormUrl(orderDetails, total, name, phone);
+  // ✅ open Google Form immediately (so it won't get blocked)
+  window.open(prefillUrl, "_blank");
 
-    function checkout() {
-      if(cart.length === 0) return;
-      document.getElementById('order-status').textContent = "Please use 'Pay with Bkash' to place your order.";
-    }
+  document.getElementById("order-status").textContent = "Submitting order to GitHub (secure)...";
+  const btn = document.getElementById("confirm-pay-btn");
+  btn.disabled = true;
 
-    function payWithBkash() {
-      if(cart.length === 0) return;
+  const payload = {
+    customerName: name || "Guest",
+    customerContact: phone || "",
+    orderDetails,
+    total,
+    timestamp: new Date().toISOString(),
+    prefillFormUrl: prefillUrl
+  };
 
-      let total = cart.reduce((sum, item) => sum + item.price, 0);
-      let bkashNumber = "01973391882"; // Replace with your Bkash number
+  try {
+    const res = await fetch(SERVERLESS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(await res.text());
 
-      // Directly show info in order status instead of alert
-      document.getElementById('order-status').textContent =
-        `Total amount: ৳${total.toFixed(2)}. Please send to Bkash number: ${bkashNumber}. After payment, submit your TRX ID via the form. Wait for 15 minutes and check confirmed orders, Thank you.`;
+    document.getElementById("order-status").textContent =
+      "✅ Order recorded. Complete payment and submit TRX in the form.";
+    cart = [];
+    updateCart();
+    closeCheckoutModal();
+  } catch (e) {
+    document.getElementById("order-status").textContent = "❌ Error: " + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
 
-      // Open Google Form in new tab
-      let orderDetails = cart.map(item => `${item.name} - ৳${item.price.toFixed(2)}`).join(", ");
-      let formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScTSThg_jtbqCnmKreArJEc4fiPVwZqSxEz3ukwLaBj9Xduhg/viewform?usp=pp_url" +
-                    "&entry.111111=" + encodeURIComponent(orderDetails);
-      window.open(formUrl, "_blank");
+function buildPrefilledFormUrl(orderDetails, total, name, phone) {
+  const params = new URLSearchParams();
+  if (FORM_ENTRY_ORDER) params.append(FORM_ENTRY_ORDER, orderDetails);
+  if (FORM_ENTRY_TOTAL) params.append(FORM_ENTRY_TOTAL, total.toFixed(2));
+  if (FORM_ENTRY_NAME) params.append(FORM_ENTRY_NAME, name);
+  if (FORM_ENTRY_PHONE) params.append(FORM_ENTRY_PHONE, phone);
+  return GOOGLE_FORM_URL + "&" + params.toString();
+}
 
-      cart = [];
-      updateCart();
-    }
-  </script>
+showShop();
+updateCart();
+</script>
 </body>
-</html>
+  </html>
